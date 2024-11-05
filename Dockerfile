@@ -1,5 +1,5 @@
 # 使用 JDK 17 的基础镜像
-FROM openjdk:17-jdk-slim
+FROM openjdk:17
 
 # 指定临时文件夹
 VOLUME /tmp

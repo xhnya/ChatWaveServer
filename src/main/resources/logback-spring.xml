@@ -24,6 +24,17 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE_DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder>
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            <!-- 设置字符集 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
 
 
     <!--输出到文件-->
@@ -99,7 +110,7 @@
 
     <springProfile name="dev">
         <!--可以输出项目中的debug日志，包括mybatis的sql日志-->
-<!--        <logger name="com.xhn" level="INFO" />-->
+        <logger name="com.xhn.chat.chatwaveserver.WebSocket" level="DEBUG" />
         <!--
             root节点是必选节点，用来指定最基础的日志输出级别，只有一个level属性
             level:用来设置打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和 OFF，默认是DEBUG
@@ -107,16 +118,16 @@
         -->
         <root level="DEBUG">
             <appender-ref ref="CONSOLE" />
-            <appender-ref ref="INFO_FILE" />
-            <appender-ref ref="WARN_FILE" />
-            <appender-ref ref="ERROR_FILE" />
+<!--            <appender-ref ref="INFO_FILE" />-->
+<!--            <appender-ref ref="WARN_FILE" />-->
+<!--            <appender-ref ref="ERROR_FILE" />-->
         </root>
     </springProfile>
 
 <!--    生产环境:输出到文件-->
     <springProfile name="pro">
         <logger name="com.xhn" level="INFO" />
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="DEBUG_FILE" />
             <appender-ref ref="INFO_FILE" />
