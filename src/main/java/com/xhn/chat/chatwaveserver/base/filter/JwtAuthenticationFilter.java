@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 获取刷新令牌的方法
     private String getRefreshTokenFromRequest(HttpServletRequest request) {
         // 可以根据实际情况实现，如从请求头或Cookie中获取
-        String bearerToken = request.getHeader("Refresh-Token");
+        String bearerToken = request.getHeader("X-Refresh-Token");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
