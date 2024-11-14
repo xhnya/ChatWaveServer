@@ -2,18 +2,25 @@ package com.xhn.chat.chatwaveserver.utils;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
 @Component
 public class JwtTokenUtil {
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
 
 
-    private final String secretKey = "your_secret_key";  // 替换为你的密钥
+
+
+    private final String secretKey = "f7A3@v9T!pZ0LwqK1rQeV5JzXk2bD4h";  // 替换为你的密钥
 
     // 验证JWT
-    public boolean validateToken(String token, String username) {
+    public boolean validateToken(String token) {
         try {
             // 解析JWT，验证签名和结构
             Claims claims = Jwts.parser()
@@ -23,18 +30,18 @@ public class JwtTokenUtil {
 
             // 验证用户名和过期时间
             String tokenUsername = claims.getSubject();
-            return (username.equals(tokenUsername) && !isTokenExpired(claims));
+            return  !isTokenExpired(claims);
 
         } catch (SignatureException e) {
-            System.out.println("无效的JWT签名：" + e.getMessage());
+            logger.error("无效的JWT签名: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            System.out.println("无效的JWT结构：" + e.getMessage());
+            logger.error("无效的JWT结构: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            System.out.println("JWT已过期：" + e.getMessage());
+            logger.error("JWT已过期: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            System.out.println("不支持的JWT：" + e.getMessage());
+            logger.error("不支持的JWT: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.out.println("JWT为空：" + e.getMessage());
+            logger.error("JWT为空: {}", e.getMessage());
         }
         return false;
     }
@@ -43,13 +50,32 @@ public class JwtTokenUtil {
         return claims.getExpiration().before(new Date());
     }
 
-    // 提取用户名
+
     public String extractUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            // 解析JWT，验证签名和结构
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // 返回用户名
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT已过期: {}", e.getMessage());
+        } catch (SignatureException e) {
+            logger.error("无效的JWT签名: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            logger.error("无效的JWT结构: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            logger.error("不支持的JWT: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            logger.error("JWT为空: {}", e.getMessage());
+        } catch (JwtException e) {
+            logger.error("JWT 解析错误: {}", e.getMessage());
+        }
+        // 如果解析失败，返回 null 或抛出异常
+        return null; // 或者可以选择抛出自定义的 InvalidTokenException
     }
 
     // 提取JWT声明（可用于额外验证）

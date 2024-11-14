@@ -14,4 +14,7 @@ public class JwtAuthenticationToken extends UsernamePasswordAuthenticationToken 
     public JwtAuthenticationToken(String username, Collection<? extends GrantedAuthority> authorities) {
         super(username, null, authorities);
     }
+
+
+
 }

@@ -22,15 +22,11 @@ public class WebFilterConfig  implements WebMvcConfigurer {
         };
     }
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.addAllowedOrigin("http://localhost:5173"); // 允许的源
-//        configuration.addAllowedMethod("*"); // 允许所有方法
-//        configuration.addAllowedHeader("*"); // 允许所有头
-//        configuration.setAllowCredentials(true); // 允许凭证
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")  // 为所有路径配置 CORS
+                .allowedOrigins("http://localhost:5173") // 允许的来源
+                .allowedMethods("GET", "POST", "PUT", "DELETE") // 允许的 HTTP 方法
+                .allowedHeaders("*"); // 允许的请求头
+    }
 }

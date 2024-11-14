@@ -1,25 +1,43 @@
 package com.xhn.chat.chatwaveserver.base.filter;
 
+import cn.hutool.core.util.StrUtil;
 import com.xhn.chat.chatwaveserver.utils.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 
+@Component
 @WebFilter
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil) {
+
+    private final ReactiveStringRedisTemplate redisTemplate;
+
+    private final  Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+
+    @Autowired
+    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, ReactiveStringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
@@ -29,32 +47,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = getTokenFromRequest(request);
         String refreshToken = getRefreshTokenFromRequest(request); // 从请求中获取刷新令牌
 
-        if (token != null) {
-            // 检查访问令牌是否有效
-            if (jwtTokenUtil.validateToken(token, jwtTokenUtil.extractUsername(token))) {
-                // 创建 JwtAuthenticationToken，表示当前用户的认证信息
-                JwtAuthenticationToken authentication = new JwtAuthenticationToken(jwtTokenUtil.extractUsername(token));
-
-                // 将认证信息存入 SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken, jwtTokenUtil.extractUsername(refreshToken))) {
-                // 访问令牌无效，但刷新令牌有效
-                String username = jwtTokenUtil.extractUsername(refreshToken);
-                String newAccessToken = jwtTokenUtil.generateAccessToken(username); // 调用方法生成新的访问令牌
-                if (newAccessToken != null) {
-                    // 将新的访问令牌返回到响应中
-                    response.setHeader("New-Access-Token", newAccessToken);
-
-                    // 设置认证信息到 SecurityContext
-                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(username);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+        if (StrUtil.isBlankIfStr(token)) {
+            // 如果访问令牌为空，直接放行
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // 继续过滤链，传递给下一个过滤器
-        filterChain.doFilter(request, response);
+        // 校验访问令牌有效性
+        if (jwtTokenUtil.validateToken(token)) {
+            // 如果访问令牌有效，创建 JwtAuthenticationToken，表示当前用户的认证信息
+            JwtAuthenticationToken authentication = new JwtAuthenticationToken(jwtTokenUtil.extractUsername(token));
+
+
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);  // 将认证信息存入 SecurityContext
+            filterChain.doFilter(request, response);  // 继续过滤链
+        } else {
+            // 访问令牌无效，检查刷新令牌
+            if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
+                // 从 Redis 中获取对应的 refreshToken
+                String username = jwtTokenUtil.extractUsername(refreshToken);
+                String storedRefreshToken = redisTemplate.opsForValue().get(username).block();  // 阻塞获取 Redis 中的刷新令牌
+
+                if (storedRefreshToken != null && storedRefreshToken.equals(refreshToken)) {
+                    // 如果刷新令牌有效，返回 401 未授权，并告知前端令牌已过期
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 Unauthorized
+                    response.setHeader("Refresh-Token-Valid", "true");  // 刷新令牌有效
+                    writeResponse(response, "令牌过期，请刷新令牌");
+                    return; // 终止请求链，避免继续传递
+                } else {
+                    // 如果刷新令牌无效，返回 401 错误，要求重新登录
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeResponse(response, "Token过期，请重新登录");
+                    return; // 终止请求链，避免继续传递
+                }
+            } else {
+                // 访问令牌和刷新令牌都无效，直接返回 401 错误，要求重新登录
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                writeResponse(response, "Token过期，请重新登录");
+                return; // 终止请求链，避免继续传递
+            }
+        }
     }
+
+    private void writeResponse(HttpServletResponse response, String message) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"message\": \"" + message + "\"}");
+    }
+
+
+
 
 
 
