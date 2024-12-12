@@ -72,28 +72,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (storedRefreshToken != null && storedRefreshToken.equals(refreshToken)) {
                     // 如果刷新令牌有效，返回 401 未授权，并告知前端令牌已过期
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 Unauthorized
-                    response.setHeader("Refresh-Token-Valid", "true");  // 刷新令牌有效
-                    writeResponse(response, "令牌过期，请刷新令牌");
+                    writeResponse(response, "令牌过期，请刷新令牌","true");
                     return; // 终止请求链，避免继续传递
                 } else {
                     // 如果刷新令牌无效，返回 401 错误，要求重新登录
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    writeResponse(response, "Token过期，请重新登录");
+                    writeResponse(response, "Token过期，请重新登录","false");
                     return; // 终止请求链，避免继续传递
                 }
             } else {
                 // 访问令牌和刷新令牌都无效，直接返回 401 错误，要求重新登录
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                writeResponse(response, "Token过期，请重新登录");
+                writeResponse(response, "Token过期，请重新登录","false");
                 return; // 终止请求链，避免继续传递
             }
         }
     }
 
-    private void writeResponse(HttpServletResponse response, String message) throws IOException {
+    private void writeResponse(HttpServletResponse response, String message,String refresh) throws IOException {
+        response.setHeader("Access-Control-Expose-Headers", "Refresh-Token-Valid");
+
+        // 设置响应头
+        response.setHeader("Refresh-Token-Valid", refresh); // 或者根据需要设置为 "false"
         response.setContentType("application/json;charset=UTF-8");
+
+        // 写入响应体
         response.getWriter().write("{\"message\": \"" + message + "\"}");
+        response.getWriter().flush();
     }
+
 
 
 

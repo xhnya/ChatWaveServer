@@ -2,14 +2,18 @@ package com.xhn.chat.chatwaveserver.user.controller;
 
 
 import cn.hutool.Hutool;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
+import com.xhn.chat.chatwaveserver.user.model.BaseUserEntity;
 import com.xhn.chat.chatwaveserver.user.model.LoginModel;
 import com.xhn.chat.chatwaveserver.user.model.UserInfoModel;
 import com.xhn.chat.chatwaveserver.utils.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +28,8 @@ public class UserController {
 
     @Autowired
     private ReactiveStringRedisTemplate redisTemplate;
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     public UserController(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
     }
@@ -46,6 +51,29 @@ public class UserController {
         System.out.println("loginModel = " + loginModel);
         return ResultResponse.success(loginModel);
     }
+
+
+    @PostMapping("/register")
+    public ResultResponse<String> register(@RequestBody BaseUserEntity baseUserEntityRequest) {
+        BaseUserEntity baseUserEntity = new BaseUserEntity();
+        baseUserEntity.setUserName(baseUserEntityRequest.getUserName());
+        String password = baseUserEntityRequest.getPassword();
+
+        String encode = passwordEncoder.encode(password);
+        baseUserEntity.setPassword(encode);
+
+
+
+        String userId = IdUtil.objectId();
+        baseUserEntity.setUserId(userId);
+
+
+
+
+        return ResultResponse.success("注册成功");
+    }
+
+
 
     @PostMapping("/referToken")
     public ResultResponse<LoginModel>  referToken(@RequestBody UserInfoModel userInfoModelRequest, HttpServletRequest httpServletRequest) {

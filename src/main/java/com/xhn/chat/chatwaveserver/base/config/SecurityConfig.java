@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,7 +47,10 @@ public class SecurityConfig {
         return source;
     }
 
-
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 
     @Bean
@@ -55,7 +60,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // 配置跨域
                 // 配置请求授权规则，使用新的 authorizeHttpRequests
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/user/login","/user/referToken").permitAll()  // 允许不认证的请求
+                        .requestMatchers("/user/referToken","/user/register","/user/login").permitAll()  // 允许不认证的请求
                         .anyRequest().authenticated()               // 其他请求需要认证
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtil,redisTemplate), UsernamePasswordAuthenticationFilter.class)

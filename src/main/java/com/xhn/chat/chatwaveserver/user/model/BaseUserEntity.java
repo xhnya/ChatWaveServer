@@ -20,6 +20,9 @@ public class BaseUserEntity implements Serializable {
     @TableId
     private String id;
 
+
+    private String userId;
+
     /**
      * 用户名
      */
