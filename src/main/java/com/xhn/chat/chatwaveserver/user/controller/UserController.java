@@ -9,7 +9,6 @@ import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
 import com.xhn.chat.chatwaveserver.user.model.BaseUserEntity;
 import com.xhn.chat.chatwaveserver.user.model.LoginModel;
 import com.xhn.chat.chatwaveserver.user.model.UserInfoModel;
-import com.xhn.chat.chatwaveserver.utils.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
