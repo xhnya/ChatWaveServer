@@ -5,22 +5,34 @@ import cn.hutool.Hutool;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.xhn.chat.chatwaveserver.base.constant.RoleConstants;
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
 import com.xhn.chat.chatwaveserver.user.model.BaseUserEntity;
 import com.xhn.chat.chatwaveserver.user.model.LoginModel;
 import com.xhn.chat.chatwaveserver.user.model.UserInfoModel;
+import com.xhn.chat.chatwaveserver.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
+
+
+    private final JwtUtil JwtUtil = SpringUtil.getBean(JwtUtil.class);
 
 
 
@@ -28,24 +40,26 @@ public class UserController {
     private ReactiveStringRedisTemplate redisTemplate;
 
 
-//
-//    @PostMapping("/login")
-//    public ResultResponse<LoginModel> login(@RequestBody LoginModel loginModelRequest) {
-////        LoginModel loginModel = new LoginModel();
-////        loginModel.setUserName(loginModelRequest.getUserName());
-////        String accessToken = jwtTokenUtil.generateAccessToken(loginModelRequest.getUserName());
-////        loginModel.setAccessToken(accessToken);
-////
-////        String md5Hex1 = DigestUtil.md5Hex(loginModelRequest.getUserName());
-////
-////        String  refreshToken=jwtTokenUtil.generateRefreshToken(md5Hex1);
-////        //设置过期时间 1000 * 60 * 60 * 24 * 7
-////        long expirationTime = 60 * 60 * 24 * 7; // 7天的毫秒数
-////        redisTemplate.opsForValue().set(md5Hex1, "xhn",expirationTime).subscribe();
-////        loginModel.setRefreshToken(refreshToken);
-////        System.out.println("loginModel = " + loginModel);
-////        return ResultResponse.success(loginModel);
-//    }
+
+    @PostMapping("/login")
+    public ResultResponse<LoginModel> login(@RequestBody LoginModel loginModelRequest) {
+        LoginModel loginModel = new LoginModel();
+        loginModel.setUserName(loginModelRequest.getUserName());
+        //设置角色 为正常用户
+
+        String accessToken = JwtUtil.generateAccessToken(loginModelRequest.getUserName(), RoleConstants.ROLE_USER);
+        loginModel.setAccessToken(accessToken);
+
+        String md5Hex1 = DigestUtil.md5Hex(loginModelRequest.getUserName());
+
+        String  refreshToken=JwtUtil.generateRefreshToken(md5Hex1);
+        //设置过期时间 1000 * 60 * 60 * 24 * 7
+        long expirationTime = 60 * 60 * 24 * 7; // 7天的毫秒数
+        redisTemplate.opsForValue().set(md5Hex1, "xhn",expirationTime).subscribe();
+        loginModel.setRefreshToken(refreshToken);
+        log.info("登录成功");
+        return ResultResponse.success(loginModel);
+    }
 
 
     @PostMapping("/register")
@@ -54,16 +68,12 @@ public class UserController {
         baseUserEntity.setUserName(baseUserEntityRequest.getUserName());
         String password = baseUserEntityRequest.getPassword();
 
-        String encode = "";
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encode = passwordEncoder.encode(password);
+
         baseUserEntity.setPassword(encode);
-
-
-
         String userId = IdUtil.objectId();
         baseUserEntity.setUserId(userId);
-
-
-
 
         return ResultResponse.success("注册成功");
     }

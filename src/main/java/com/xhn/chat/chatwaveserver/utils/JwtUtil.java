@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,9 +25,11 @@ public class JwtUtil {
     private final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000;  // 7 天
 
     // 生成 Access Token
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(String username,String roles) {
+        //添加角色
         return Jwts.builder()
                 .setSubject(username)
+                .claim("system_role", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
@@ -67,11 +70,21 @@ public class JwtUtil {
 
     public List<GrantedAuthority> getAuthorities(String token) {
         Claims claims = getClaimsFromToken(token);
-        // 假设多个角色以逗号分隔存储在 "roles" 字段
-        String roles = claims.get("roles", String.class);
-        return Arrays.stream(roles.split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+
+        // 获取用户的系统角色（例如: USER, ADMIN, SUPER_ADMIN 等）
+        String systemRole = claims.get("system_role", String.class);
+
+        // 通过系统角色生成一个 GrantedAuthority 对象
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority( systemRole));
+
+        // 在这里，你可以根据需要添加群组角色的查询
+        // 例如，可以根据用户ID和群组ID查询群组角色，然后动态添加角色
+
+        // 如果需要处理群组角色，可以通过API查询群组角色并返回
+        // authorities.add(new SimpleGrantedAuthority("GROUP_" + groupRole));
+
+        return authorities;
     }
 
 
