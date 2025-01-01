@@ -18,8 +18,11 @@ public class GlobalExceptionHandler {
     // 处理自定义业务异常
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ResultResponse<String>> handleBusinessException(AppException ex) {
+        // 获取对应的 ErrorCode 枚举
+        ErrorCode errorCode = ErrorCode.fromCode(ex.getStatus());
+
         return ResponseEntity
-                .status(ex.getStatus())
+                .status(errorCode.getHttpStatus())
                 .body(ResultResponse.error(ex.getStatus(), ex.getMessage()));
     }
 
