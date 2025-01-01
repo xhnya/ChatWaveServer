@@ -20,11 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtUtil jwtUtil;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtUtil jwtUtil, JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtUtil = jwtUtil;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -34,7 +32,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)  // 禁用 CSRF 防护（可根据需求启用）
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/user/login", "/user/register").permitAll()  // 允许公开的资源
+                        .requestMatchers(
+                                "/user/login",
+                                "user/referToken",
+                                "/user/register").permitAll()  // 允许公开的资源
                         .anyRequest().authenticated()  // 其他资源需要认证
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)  // 在 Spring Security 的过滤器链中添加 JWT 过滤器
@@ -43,16 +44,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 使用 AuthenticationManager 配置认证
-    @Bean
-    public UserDetailsService userDetailsService() {
-        var user = User.withUsername("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

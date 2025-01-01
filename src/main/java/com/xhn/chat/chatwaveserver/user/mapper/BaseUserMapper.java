@@ -3,6 +3,7 @@ package com.xhn.chat.chatwaveserver.user.mapper;
 import com.xhn.chat.chatwaveserver.user.model.BaseUserEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
 * @author 93095
@@ -12,6 +13,8 @@ import org.apache.ibatis.annotations.Mapper;
 */
 public interface BaseUserMapper extends BaseMapper<BaseUserEntity> {
 
+    @Select("select * from base_user where user_name = #{userName}")
+    BaseUserEntity selectUserByUserName(String userName);
 }
 
 

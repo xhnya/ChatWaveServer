@@ -2,6 +2,7 @@ package com.xhn.chat.chatwaveserver.user.service;
 
 import com.xhn.chat.chatwaveserver.user.model.BaseUserEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xhn.chat.chatwaveserver.user.model.LoginModel;
 
 /**
 * @author 93095
@@ -10,4 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface BaseUserService extends IService<BaseUserEntity> {
 
+    LoginModel login(LoginModel loginModelRequest);
+
+    LoginModel referToken(String refreshToken);
 }

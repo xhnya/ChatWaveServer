@@ -7,6 +7,8 @@ public class LoginModel {
 
     private String userName;
 
+    private String password;
+
     private String accessToken;
 
     private String refreshToken;
