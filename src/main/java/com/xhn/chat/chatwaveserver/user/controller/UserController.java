@@ -12,6 +12,7 @@ import com.xhn.chat.chatwaveserver.user.model.LoginModel;
 import com.xhn.chat.chatwaveserver.user.model.UserInfoModel;
 import com.xhn.chat.chatwaveserver.user.service.BaseUserService;
 import com.xhn.chat.chatwaveserver.utils.JwtUtil;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -91,13 +92,14 @@ public class UserController {
 
 
 
+    //加上权限注解参数
     @PostMapping("/getUserInfo")
     public ResultResponse<UserInfoModel>  getUserInfo(@RequestBody UserInfoModel userInfoModelRequest) {
         UserInfoModel userInfoModel = new UserInfoModel();
-        userInfoModel.setUserName("xhn");
-        userInfoModel.setNickName("xhn");
-        userInfoModel.setAge("18");
-        userInfoModel.setAvatar("https://avatars.githubusercontent.com/u/37236788?v=4");
+//        userInfoModel.setUserName("xhn");
+//        userInfoModel.setNickName("xhn");
+//        userInfoModel.setAge("18");
+//        userInfoModel.setAvatar("https://avatars.githubusercontent.com/u/37236788?v=4");
         return ResultResponse.success(userInfoModel);
     }
 
