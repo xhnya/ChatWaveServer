@@ -1,5 +1,6 @@
 package com.xhn.chat.chatwaveserver.user.service;
 
+import com.xhn.chat.chatwaveserver.user.model.RegisterRequestModel;
 import com.xhn.chat.chatwaveserver.user.model.UsersEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -10,4 +11,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UsersService extends IService<UsersEntity> {
 
+    void register(RegisterRequestModel registerRequestModel);
 }

@@ -33,9 +33,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)  // 禁用 CSRF 防护（可根据需求启用）
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
-                                "/user/login",
-                                "user/referToken",
-                                "/user/register").permitAll()  // 允许公开的资源
+                                "/users/login",
+                                "users/referToken",
+                                "/users/register").permitAll()  // 允许公开的资源
                         .anyRequest().authenticated()  // 其他资源需要认证
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)  // 在 Spring Security 的过滤器链中添加 JWT 过滤器

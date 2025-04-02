@@ -1,58 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <contextName>logback</contextName>
+    <!-- 动态读取配置文件中的日志路径 -->
+    <springProperty scope="context" name="logPath" source="log.path" defaultValue="logs"/>
+<!--    <property name="logPath" value="${log.path}" />-->
 
-    <property name="logPath" value="${log.path}" />
-    <!-- 彩色日志 -->
-    <!-- 配置格式变量：CONSOLE_LOG_PATTERN 彩色日志格式 -->
-    <!-- magenta:洋红 -->
-    <!-- boldMagenta:粗红-->
-    <!-- cyan:青色 -->
-    <!-- white:白色 -->
-    <!-- magenta:洋红 -->
+    <!-- 彩色日志格式 -->
     <property name="CONSOLE_LOG_PATTERN"
               value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) |%highlight(%-5level) |%blue(%thread) |%blue(%file:%line) |%green(%logger) |%cyan(%msg%n)"/>
 
-    <!-- 控制台输出 -->
+    <!-- 统一控制台输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
+<!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+<!--            <level>INFO</level> &lt;!&ndash; 修改为 DEBUG 或 ERROR &ndash;&gt;-->
+<!--        </filter>-->
         <encoder>
             <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
-            <!-- 设置字符集 -->
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-    <!-- 控制台输出 -->
-    <appender name="CONSOLE_DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+
+    <!-- 调试日志文件 -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/log_debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logPath}/log-debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
-        <encoder>
-            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
-            <!-- 设置字符集 -->
-            <charset>UTF-8</charset>
-        </encoder>
     </appender>
 
-
-    <!--输出到文件-->
+    <!-- 信息日志文件 -->
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- 正在记录的日志文件的路径及文件名 -->
         <file>${logPath}/log_info.log</file>
-        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${logPath}/log-info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>15</maxHistory>
         </rollingPolicy>
-        <!--日志文件输出格式-->
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
-        <!-- 此日志文件只记录info级别的 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
@@ -60,80 +56,66 @@
         </filter>
     </appender>
 
-    <!-- 时间滚动输出 level为 WARN 日志 -->
+    <!-- 警告日志文件 -->
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- 正在记录的日志文件的路径及文件名 -->
         <file>${logPath}/log_warn.log</file>
-        <!--日志文件输出格式-->
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
-            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
-        </encoder>
-        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${logPath}/log-warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>15</maxHistory>
         </rollingPolicy>
-        <!-- 此日志文件只记录warn级别的 -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>warn</level>
+            <level>WARN</level>  <!-- 修正为全大写 -->
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
 
-    <!-- 时间滚动输出 level为 ERROR 日志 -->
+    <!-- 错误日志文件 -->
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!-- 正在记录的日志文件的路径及文件名 -->
         <file>${logPath}/log_error.log</file>
-        <!--日志文件输出格式-->
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
-            <charset>UTF-8</charset> <!-- 此处设置字符集 -->
-        </encoder>
-        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${logPath}/log-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>15</maxHistory>
         </rollingPolicy>
-        <!-- 此日志文件只记录ERROR级别的 -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-
-
-
+    <!-- 开发环境配置 -->
     <springProfile name="dev">
-        <!--可以输出项目中的debug日志，包括mybatis的sql日志-->
-        <logger name="com.xhn.chat.chatwaveserver.WebSocket" level="DEBUG" />
-        <!--
-            root节点是必选节点，用来指定最基础的日志输出级别，只有一个level属性
-            level:用来设置打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和 OFF，默认是DEBUG
-            可以包含零个或多个appender元素。
-        -->
-        <root level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-            <appender-ref ref="INFO_FILE" />
-            <appender-ref ref="WARN_FILE" />
-            <appender-ref ref="ERROR_FILE" />
-        </root>
-    </springProfile>
 
-<!--    生产环境:输出到文件-->
-    <springProfile name="pro">
-        <logger name="com.xhn" level="INFO" />
+        <logger name="com.xhn.chat.chatwaveserver" level="DEBUG"/>
+<!--        <logger name="com.xhn.chat.chatwaveserver.chat.mapper" level="DEBUG"/>-->
         <root level="INFO">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="DEBUG_FILE" />
             <appender-ref ref="INFO_FILE" />
-            <appender-ref ref="ERROR_FILE" />
             <appender-ref ref="WARN_FILE" />
+            <appender-ref ref="ERROR_FILE" />
+<!--            <appender-ref ref="stdout"/>-->
         </root>
     </springProfile>
 
+    <!-- 生产环境配置 -->
+    <springProfile name="pro">
+        <logger name="com.xhn" level="INFO" />
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="INFO_FILE" />
+            <appender-ref ref="WARN_FILE" />
+            <appender-ref ref="ERROR_FILE" />
+        </root>
+    </springProfile>
 </configuration>
