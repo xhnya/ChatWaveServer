@@ -23,4 +23,21 @@
         phone,status,created_at,
         updated_at
     </sql>
+    <select id="selectTest">
+        SELECT *
+        FROM users
+        <where>
+            <choose>
+                <when test="name == '1'">
+                    username = 1
+                </when>
+                <when test="name == '2'">
+                    nickname = 2
+                </when>
+                <otherwise>
+                    1=1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
 </mapper>

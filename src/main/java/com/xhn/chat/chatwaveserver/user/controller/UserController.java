@@ -2,7 +2,8 @@ package com.xhn.chat.chatwaveserver.user.controller;
 
 
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
-import com.xhn.chat.chatwaveserver.user.model.RegisterRequestModel;
+import com.xhn.chat.chatwaveserver.user.model.model.LoginModel;
+import com.xhn.chat.chatwaveserver.user.model.model.RegisterRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.UsersService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,10 @@ public class UserController {
     UsersService usersService;
 
     @PostMapping("/login")
-    public ResultResponse login() {
+    public ResultResponse<LoginModel> login(@Valid  @RequestBody LoginModel loginModel) {
 
-        return ResultResponse.success();
+        LoginModel result= usersService.login(loginModel);
+        return ResultResponse.success(result);
     }
 
     @PostMapping("/register")
@@ -29,7 +31,13 @@ public class UserController {
     }
 
     @GetMapping("/test")
-    public ResultResponse<String> test() {
+    public ResultResponse<String> test(@RequestParam String name) {
+        usersService.selectTest(name);
+        return ResultResponse.success("测试成功");
+    }
+
+    @GetMapping("/getUserInfo")
+    public ResultResponse<String> getUserInfo() {
         usersService.list();
         return ResultResponse.success("测试成功");
     }

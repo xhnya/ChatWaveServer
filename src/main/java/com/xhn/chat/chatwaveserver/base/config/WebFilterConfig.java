@@ -2,9 +2,6 @@ package com.xhn.chat.chatwaveserver.base.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
@@ -22,11 +19,13 @@ public class WebFilterConfig  implements WebMvcConfigurer {
         };
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")  // 为所有路径配置 CORS
-                .allowedOrigins("http://localhost:5173") // 允许的来源
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // 允许的 HTTP 方法
-                .allowedHeaders("*"); // 允许的请求头
-    }
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")  // 为所有路径配置 CORS
+//                .allowedOrigins("http://localhost:5173") // 允许的来源
+//                .allowedMethods("GET", "POST", "PUT", "DELETE") // 允许的 HTTP 方法
+//                .allowedHeaders("*")
+//                .allowCredentials(true); // 允许的请求头
+//
+//    }
 }

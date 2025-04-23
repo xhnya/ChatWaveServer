@@ -1,34 +1,20 @@
 package com.xhn.chat.chatwaveserver.WebSocket.config;
 
-import org.springframework.context.annotation.Bean;
+import com.xhn.chat.chatwaveserver.WebSocket.service.ChatWebSocketHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("http://localhost:5173", "http://localhost:9000").withSockJS(); // 这里定义WebSocket连接的端点
-    }
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
+    @Autowired
+    private ChatWebSocketHandler chatHandler;
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic"); // 启用简单的消息代理
-        config.setApplicationDestinationPrefixes("/message"); // 设置应用程序目的地前缀
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(chatHandler, "/ws/chat").setAllowedOrigins("*");
     }
-    // 配置支持 JSON 消息转换器
-    @Bean
-    public MessageConverter messageConverter() {
-        return new MappingJackson2MessageConverter(); // 支持 JSON 格式的转换
-    }
-
-
-
 }

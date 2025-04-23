@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface UsersMapper extends BaseMapper<UsersEntity> {
 
+    void selectTest(String name);
 }
 
 

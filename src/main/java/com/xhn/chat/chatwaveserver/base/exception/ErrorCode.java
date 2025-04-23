@@ -11,6 +11,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_INVALID(1003, HttpStatus.FORBIDDEN),   // 刷新令牌无效 -> 403
     INTERNAL_SERVER_ERROR(1004, HttpStatus.INTERNAL_SERVER_ERROR);  // 其他未知错误 -> 500
 
+
     private final int code;
     private final HttpStatus httpStatus;
 
