@@ -41,7 +41,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         messageService.saveMessage(msg);
 
         if (msg.getGroupId() != null) {
-            // 简化：群成员你可以用 JPA 查出来，下面直接群发给所有在线成员
+            // 下面直接群发给所有在线成员
             for (WebSocketSession s : userSessions.values()) {
                 s.sendMessage(new TextMessage(objectMapper.writeValueAsString(msg)));
             }
