@@ -3,6 +3,8 @@ package com.xhn.chat.chatwaveserver.user.mapper;
 import com.xhn.chat.chatwaveserver.user.model.UsersEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.List;
+
 /**
 * @author 93095
 * @description 针对表【users(用户表)】的数据库操作Mapper
@@ -12,6 +14,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 public interface UsersMapper extends BaseMapper<UsersEntity> {
 
     void selectTest(String name);
+
+    List<UsersEntity> searchUser(String params);
 }
 
 

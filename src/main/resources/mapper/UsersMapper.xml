@@ -40,4 +40,10 @@
             </choose>
         </where>
     </select>
+    <select id="searchUser" resultType="com.xhn.chat.chatwaveserver.user.model.UsersEntity">
+        SELECT id,username,avatar,nickname
+        FROM  users
+        WHERE nickname=#{params}
+        OR username=#{params}
+    </select>
 </mapper>

@@ -2,12 +2,15 @@ package com.xhn.chat.chatwaveserver.user.controller;
 
 
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
+import com.xhn.chat.chatwaveserver.user.model.UsersEntity;
 import com.xhn.chat.chatwaveserver.user.model.model.LoginModel;
 import com.xhn.chat.chatwaveserver.user.model.model.RegisterRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.UsersService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -40,6 +43,14 @@ public class UserController {
     public ResultResponse<String> getUserInfo() {
         usersService.list();
         return ResultResponse.success("测试成功");
+    }
+
+
+    @GetMapping("/searchUser")
+    public ResultResponse<List<UsersEntity>> searchUser(@RequestParam String params) {
+        List<UsersEntity> userInfo = usersService.searchUser(params);
+        return ResultResponse.success(userInfo);
+
     }
 
 

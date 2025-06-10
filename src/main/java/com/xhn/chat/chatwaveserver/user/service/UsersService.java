@@ -5,6 +5,8 @@ import com.xhn.chat.chatwaveserver.user.model.model.RegisterRequestModel;
 import com.xhn.chat.chatwaveserver.user.model.UsersEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
 * @author 93095
 * @description 针对表【users(用户表)】的数据库操作Service
@@ -17,4 +19,6 @@ public interface UsersService extends IService<UsersEntity> {
     LoginModel login(LoginModel loginModel);
 
     void selectTest(String name);
+
+    List<UsersEntity> searchUser(String params);
 }

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 
 
 /**
@@ -82,6 +83,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, UsersEntity>
     @Override
     public void selectTest(String name) {
         baseMapper.selectTest(name);
+    }
+
+    @Override
+    public List<UsersEntity> searchUser(String params) {
+        return baseMapper.searchUser(params);
     }
 }
 
