@@ -15,6 +15,16 @@ import org.springframework.stereotype.Service;
 public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper, FriendRequestsEntity>
     implements FriendRequestsService{
 
+    @Override
+    public void addFriendRequest(Long userId, Long friendId) {
+
+        FriendRequestsEntity friendRequest = new FriendRequestsEntity();
+        friendRequest.setSenderId(userId);
+        friendRequest.setReceiverId(friendId);
+        friendRequest.setStatus(0); // 设置请求状态为待处理
+        // 设置其他必要的字段
+        save(friendRequest); // 保存好友请求
+    }
 }
 
 

@@ -37,7 +37,7 @@ public class ResultResponse<T> {
     }
 
     public static <T> ResultResponse<T> error(String message) {
-        return new ResultResponse<>(400, message, null);
+        return new ResultResponse<>(500, message, null);
     }
 
 

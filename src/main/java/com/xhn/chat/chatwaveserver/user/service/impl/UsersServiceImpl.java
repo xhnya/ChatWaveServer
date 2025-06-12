@@ -1,7 +1,10 @@
 package com.xhn.chat.chatwaveserver.user.service.impl;
 
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xhn.chat.chatwaveserver.base.config.RabbitConfig;
 import com.xhn.chat.chatwaveserver.base.exception.AppException;
 import com.xhn.chat.chatwaveserver.base.exception.ErrorCode;
 import com.xhn.chat.chatwaveserver.user.model.model.LoginModel;
@@ -10,6 +13,9 @@ import com.xhn.chat.chatwaveserver.user.model.UsersEntity;
 import com.xhn.chat.chatwaveserver.user.service.UsersService;
 import com.xhn.chat.chatwaveserver.user.mapper.UsersMapper;
 import com.xhn.chat.chatwaveserver.utils.JwtUtil;
+import org.bson.json.JsonObject;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,7 +36,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, UsersEntity>
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -53,6 +60,23 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, UsersEntity>
         usersEntity.setNickname(registerRequestModel.getUsername());
         usersEntity.setStatus(1);
         save(usersEntity);
+
+        String usersEntityJson = JSONUtil.toJsonStr(usersEntity);
+
+        //发送消息给RabbitMQ
+        rabbitTemplate.convertAndSend(RabbitConfig.USER_REGISTER_EXCHANGE_NAME
+                , "", usersEntityJson);
+
+    }
+
+
+
+    @RabbitListener(queues = "user.register.profile.queue")
+    public void initUserProfile(String userInfoJson) {
+        // 初始化资料的逻辑
+        // 这里可以将 userInfoJson 转换为 UsersEntity 对象并进行处理
+        UsersEntity user = JSONUtil.toBean(userInfoJson, UsersEntity.class);
+        // 初始化好友分组列表，创建一个 我的好友分组
     }
 
     @Override

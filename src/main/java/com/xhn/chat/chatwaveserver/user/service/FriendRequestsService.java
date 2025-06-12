@@ -10,4 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface FriendRequestsService extends IService<FriendRequestsEntity> {
 
+    void addFriendRequest(Long userId, Long friendId);
 }
