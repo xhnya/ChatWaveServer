@@ -31,7 +31,8 @@ public class FriendRequestListener {
         if (isUserOnline(receiverId)) {
 //            webSocketService.pushNotification(receiverId, "您有新的好友请求");
             //获取连接
-           chatWebSocketHandler.sendSystemMessage(receiverId, "您有新的好友请求");
+           chatWebSocketHandler.sendSystemMessage(receiverId, "您有新的好友请求", null);
+            // 发送 WebSocket 消息
         } else {
 //            offlineNotificationService.saveNotification(receiverId, "您有新的好友请求");
         }
