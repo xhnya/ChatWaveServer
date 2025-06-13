@@ -41,4 +41,25 @@ public class RabbitConfig {
         return BindingBuilder.bind(profileQueue).to(userRegisterExchange);
     }
 
+
+
+
+//  好友请求
+    @Bean
+    public TopicExchange friendRequestExchange() {
+        return new TopicExchange("friendRequestExchange");
+    }
+
+    @Bean
+    public Queue friendRequestQueue() {
+        return new Queue("friendRequestQueue");
+    }
+
+    @Bean
+    public Binding binding() {
+        return BindingBuilder.bind(friendRequestQueue())
+                .to(friendRequestExchange())
+                .with("friend.request");
+    }
+
 }

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xhn.chat.chatwaveserver.user.model.FriendRequestsEntity;
 import com.xhn.chat.chatwaveserver.user.service.FriendRequestsService;
 import com.xhn.chat.chatwaveserver.user.mapper.FriendRequestsMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,6 +17,11 @@ import org.springframework.stereotype.Service;
 public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper, FriendRequestsEntity>
     implements FriendRequestsService{
 
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+
     @Override
     public void addFriendRequest(Long userId, Long friendId) {
 
@@ -24,6 +31,11 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
         friendRequest.setStatus(0); // 设置请求状态为待处理
         // 设置其他必要的字段
         save(friendRequest); // 保存好友请求
+
+        // 构造事件消息对象
+
+        // 发送事件到 RabbitMQ
+        rabbitTemplate.convertAndSend("friendRequestExchange", "friend.request", friendRequest);
     }
 }
 
