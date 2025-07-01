@@ -2,6 +2,7 @@ package com.xhn.chat.chatwaveserver.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xhn.chat.chatwaveserver.user.model.FriendRequestsEntity;
+import com.xhn.chat.chatwaveserver.user.model.FriendsEntity;
 import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.FriendRequestsService;
 import com.xhn.chat.chatwaveserver.user.mapper.FriendRequestsMapper;
@@ -44,6 +45,11 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
     @Override
     public List<FriendRequestModel> getFriendRequests(Long userId) {
         return baseMapper.getFriendRequestsByUserId(userId);
+    }
+
+    @Override
+    public void updateFriendRequest(FriendsEntity friendsEntity) {
+        baseMapper.updateFriendRequestStatus(friendsEntity.getUserId(), friendsEntity.getFriendId());
     }
 }
 
