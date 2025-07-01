@@ -16,4 +16,12 @@
         id,sender_id,receiver_id,
         status,created_at
     </sql>
+    <select id="getFriendRequestsByUserId"
+            resultType="com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel">
+        SELECT u.nickname,u.id AS userId,fr.status,fr.created_at
+        FROM friend_requests fr
+        LEFT JOIN ChatWave.users u on fr.sender_id = u.id
+        WHERE receiver_id = #{userId}
+        ORDER BY fr.created_at DESC
+    </select>
 </mapper>

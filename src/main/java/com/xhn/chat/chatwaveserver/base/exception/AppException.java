@@ -10,4 +10,9 @@ public class AppException  extends RuntimeException{
         super(message);
         this.status = status;
     }
+
+    public AppException(String message){
+        super(message);
+        this.status = 500;
+    }
 }

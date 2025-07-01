@@ -1,13 +1,12 @@
 package com.xhn.chat.chatwaveserver.user.controller;
 
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
+import com.xhn.chat.chatwaveserver.user.model.FriendsEntity;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.FriendRequestsService;
 import com.xhn.chat.chatwaveserver.user.service.FriendsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -44,12 +43,30 @@ public class FiendsController {
         friendRequestsService.addFriendRequest(userId, friendId);
         return ResultResponse.success("Friend added successfully");
     }
-    @PostMapping("/getFriendsRequestList")
-    public ResultResponse<List<String>> getFriendsRequestList(@RequestParam Long userId) {
+    @GetMapping("/getFriendsRequestList")
+    public ResultResponse<List<FriendRequestModel>> getFriendsRequestList(@RequestParam Long userId) {
         // 获取token的用户id
         // 调用服务层方法获取好友列表
         // 返回结果
-        return ResultResponse.error("User ID 不能为空");
+        List<FriendRequestModel> requests = friendRequestsService.getFriendRequests(userId);
+        return ResultResponse.success("获取好友请求列表成功", requests);
+
+    }
+
+
+    @PostMapping("/acceptFriendRequest")
+    public ResultResponse<String> acceptFriendRequest(@RequestBody FriendsEntity friendsEntity) {
+        // 获取token的用户id
+        // 调用服务层方法接受好友请求
+        // 返回结果
+        Long userId = friendsEntity.getUserId();
+        Long friendId = friendsEntity.getFriendId();
+        if (userId == null || friendId == null) {
+            return ResultResponse.error("User ID and Friend ID 不能为空");
+        }
+
+        friendsService.acceptFriendRequest(friendsEntity);
+        return ResultResponse.success("成功接受好友请求");
     }
 
 

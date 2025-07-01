@@ -2,6 +2,9 @@ package com.xhn.chat.chatwaveserver.user.service;
 
 import com.xhn.chat.chatwaveserver.user.model.FriendRequestsEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
+
+import java.util.List;
 
 /**
 * @author 93095
@@ -11,4 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface FriendRequestsService extends IService<FriendRequestsEntity> {
 
     void addFriendRequest(Long userId, Long friendId);
+
+    List<FriendRequestModel> getFriendRequests(Long userId);
 }

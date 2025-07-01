@@ -2,6 +2,9 @@ package com.xhn.chat.chatwaveserver.user.mapper;
 
 import com.xhn.chat.chatwaveserver.user.model.FriendRequestsEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
+
+import java.util.List;
 
 /**
 * @author 93095
@@ -11,6 +14,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface FriendRequestsMapper extends BaseMapper<FriendRequestsEntity> {
 
+    List<FriendRequestModel> getFriendRequestsByUserId(Long userId);
 }
 
 

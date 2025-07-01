@@ -2,11 +2,14 @@ package com.xhn.chat.chatwaveserver.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xhn.chat.chatwaveserver.user.model.FriendRequestsEntity;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.FriendRequestsService;
 import com.xhn.chat.chatwaveserver.user.mapper.FriendRequestsMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
 * @author 93095
@@ -36,6 +39,11 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
 
         // 发送事件到 RabbitMQ
         rabbitTemplate.convertAndSend("friendRequestExchange", "friend.request", friendRequest);
+    }
+
+    @Override
+    public List<FriendRequestModel> getFriendRequests(Long userId) {
+        return baseMapper.getFriendRequestsByUserId(userId);
     }
 }
 
