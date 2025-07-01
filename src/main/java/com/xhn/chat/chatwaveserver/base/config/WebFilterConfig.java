@@ -2,14 +2,17 @@ package com.xhn.chat.chatwaveserver.base.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebFilterConfig  implements WebMvcConfigurer {
+public class WebFilterConfig {
+
+    // 添加 CSP 头部的响应式 WebFilter
     @Bean
     public WebFilter cspFilter() {
         return (ServerWebExchange exchange, WebFilterChain chain) -> {
@@ -19,13 +22,18 @@ public class WebFilterConfig  implements WebMvcConfigurer {
         };
     }
 
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**")  // 为所有路径配置 CORS
-//                .allowedOrigins("http://localhost:5173") // 允许的来源
-//                .allowedMethods("GET", "POST", "PUT", "DELETE") // 允许的 HTTP 方法
-//                .allowedHeaders("*")
-//                .allowCredentials(true); // 允许的请求头
-//
-//    }
+    // CORS 配置（WebFlux 版本）
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsWebFilter(source);
+    }
 }

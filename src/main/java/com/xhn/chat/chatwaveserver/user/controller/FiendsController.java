@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author xhn
  * @date 2025/6/10 15:50
@@ -41,6 +43,13 @@ public class FiendsController {
 
         friendRequestsService.addFriendRequest(userId, friendId);
         return ResultResponse.success("Friend added successfully");
+    }
+    @PostMapping("/getFriendsRequestList")
+    public ResultResponse<List<String>> getFriendsRequestList(@RequestParam Long userId) {
+        // 获取token的用户id
+        // 调用服务层方法获取好友列表
+        // 返回结果
+        return ResultResponse.error("User ID 不能为空");
     }
 
 

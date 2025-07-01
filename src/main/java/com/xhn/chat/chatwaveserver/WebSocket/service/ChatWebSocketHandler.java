@@ -8,17 +8,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class ChatWebSocketHandler extends TextWebSocketHandler {
+public class ChatWebSocketHandler implements WebSocketHandler {
 
     private static final Map<Long, Set<WebSocketSession>> userSessions = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(ChatWebSocketHandler.class);
@@ -26,88 +26,94 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Autowired private MessageService messageService;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private ChatGroupsService groupService;
+    @Autowired private StringRedisTemplate stringRedisTemplate;
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    @Override
+    public Mono<Void> handle(WebSocketSession session) {
+        Long userId = getUserId(session);
+        userSessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(session);
+        logger.info("用户 {} 连接", userId);
+        stringRedisTemplate.opsForSet().add("onlineUsers", String.valueOf(userId));
 
+        // 处理接收消息逻辑
+        Mono<Void> input = session.receive()
+                .flatMap(webSocketMessage -> {
+                    String payload = webSocketMessage.getPayloadAsText();
+                    try {
+                        Message msg = objectMapper.readValue(payload, Message.class);
+                        messageService.saveMessage(msg);
 
+                        return dispatchMessage(msg);
+                    } catch (Exception e) {
+                        logger.error("处理消息失败", e);
+                        return Mono.empty();
+                    }
+                }).then();
 
+        // 处理关闭连接逻辑
+        Mono<Void> close = session.closeStatus()
+                .doOnTerminate(() -> removeSession(userId, session))
+                .then();
 
+        return Mono.zip(input, close).then();
+    }
 
-    // ✅ 封装方法：推送系统消息
+    private Mono<Void> dispatchMessage(Message msg) {
+        try {
+            String json = objectMapper.writeValueAsString(msg);
+            WebSocketMessage webSocketMessage = null;
+
+            if (msg.getGroupId() != null) {
+                // 示例：List<Long> groupMembers = groupService.getMembers(msg.getGroupId());
+                List<Long> groupMembers = new ArrayList<>();
+                return Flux.fromIterable(groupMembers)
+                        .flatMap(memberId -> {
+                            Set<WebSocketSession> sessions = userSessions.get(memberId);
+                            if (sessions != null) {
+                                return Flux.fromIterable(sessions)
+                                        .flatMap(s -> s.send(Mono.just(s.textMessage(json))));
+                            }
+                            return Mono.empty();
+                        }).then();
+            } else if (msg.getReceiverId() != null) {
+                Set<WebSocketSession> sessions = userSessions.get(msg.getReceiverId());
+                if (sessions != null) {
+                    return Flux.fromIterable(sessions)
+                            .flatMap(s -> s.send(Mono.just(s.textMessage(json))))
+                            .then();
+                }
+            }
+        } catch (Exception e) {
+            logger.error("发送消息失败", e);
+        }
+        return Mono.empty();
+    }
+
     public void sendSystemMessage(Long userId, String content, Map<String, Object> data) {
         Set<WebSocketSession> sessions = userSessions.get(userId);
         if (sessions != null && !sessions.isEmpty()) {
             Message msg = new Message();
-            msg.setSenderId(0L); // 表示系统
+            msg.setSenderId(0L);
             msg.setReceiverId(userId);
             msg.setType("system");
             msg.setSystemMessage(true);
             msg.setContent(content);
             msg.setData(data);
+
             messageService.saveMessage(msg);
+
             try {
                 String json = objectMapper.writeValueAsString(msg);
                 for (WebSocketSession session : sessions) {
-                    session.sendMessage(new TextMessage(json));
+                    session.send(Mono.just(session.textMessage(json))).subscribe();
                 }
-            } catch (IOException e) {
-                logger.error("推送系统消息失败: {}", e.getMessage(), e);
+            } catch (Exception e) {
+                logger.error("推送系统消息失败", e);
             }
         }
     }
 
-
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-        Long userId = getUserId(session);
-        userSessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(session);
-        logger.info("用户 {} 连接", userId);
-        stringRedisTemplate.opsForSet().add("onlineUsers", String.valueOf(userId));
-//        stringRedisTemplate.opsForSet().add("userNodes:" + userId, currentNodeId);
-    }
-
-    @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
-        try {
-            Message msg = objectMapper.readValue(textMessage.getPayload(), Message.class);
-            messageService.saveMessage(msg);
-
-            if (msg.getGroupId() != null) {
-//                List<Long> groupMembers = groupService.getMembers(msg.getGroupId());
-                List<Long> groupMembers = new ArrayList<>();
-                for (Long memberId : groupMembers) {
-                    Set<WebSocketSession> sessions = userSessions.get(memberId);
-                    if (sessions != null) {
-                        for (WebSocketSession s : sessions) {
-                            try {
-                                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(msg)));
-                            } catch (IOException e) {
-                                logger.error("群发消息失败，sessionId={}", s.getId(), e);
-                            }
-                        }
-                    }
-                }
-            } else if (msg.getReceiverId() != null) {
-                Set<WebSocketSession> sessions = userSessions.get(msg.getReceiverId());
-                if (sessions != null) {
-                    for (WebSocketSession s : sessions) {
-                        try {
-                            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(msg)));
-                        } catch (IOException e) {
-                            logger.error("私聊消息发送失败，sessionId={}", s.getId(), e);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("处理消息失败", e);
-        }
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        Long userId = getUserId(session);
+    private void removeSession(Long userId, WebSocketSession session) {
         Set<WebSocketSession> sessions = userSessions.get(userId);
         if (sessions != null) {
             sessions.remove(session);
@@ -116,17 +122,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             }
         }
         stringRedisTemplate.opsForSet().remove("onlineUsers", String.valueOf(userId));
-
         logger.info("用户 {} 断开连接", userId);
     }
 
     private Long getUserId(WebSocketSession session) {
-        // 生产环境建议改为基于token鉴权获取
-        return Long.valueOf(Objects.requireNonNull(session.getUri()).getQuery().split("=")[1]);
+        String query = session.getHandshakeInfo().getUri().getQuery();
+        return Long.valueOf(query.split("=")[1]);
     }
 
     public Set<WebSocketSession> getSessions(Long userId) {
         return userSessions.getOrDefault(userId, Collections.emptySet());
     }
 }
-
