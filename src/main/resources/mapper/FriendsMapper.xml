@@ -17,4 +17,11 @@
         id,user_id,friend_id,
         status,created_at,updated_at
     </sql>
+    <select id="getFriendsByUserId" resultType="com.xhn.chat.chatwaveserver.user.model.model.FriendListModel">
+        SELECT u.nickname as title, u.avatar as prependAvatar,'在线' as subtitle,
+               u.id as userId
+        FROM friends
+        LEFT JOIN users u on friends.friend_id = u.id
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

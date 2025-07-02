@@ -2,6 +2,7 @@ package com.xhn.chat.chatwaveserver.user.controller;
 
 import com.xhn.chat.chatwaveserver.base.response.ResultResponse;
 import com.xhn.chat.chatwaveserver.user.model.FriendsEntity;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendGroupListModel;
 import com.xhn.chat.chatwaveserver.user.model.model.FriendRequestModel;
 import com.xhn.chat.chatwaveserver.user.service.FriendRequestsService;
 import com.xhn.chat.chatwaveserver.user.service.FriendsService;
@@ -68,6 +69,17 @@ public class FiendsController {
         friendsService.acceptFriendRequest(friendsEntity);
         return ResultResponse.success("成功接受好友请求");
     }
+
+    //获取好友列表
+    @GetMapping("/getFriendsList")
+    public ResultResponse<List<FriendGroupListModel>> getFriendsList(@RequestParam Long userId) {
+        // 获取token的用户id
+        // 调用服务层方法获取好友列表
+        // 返回结果
+        List<FriendGroupListModel> friendsList = friendsService.getFriendsList(userId);
+        return ResultResponse.success("获取好友列表成功", friendsList);
+    }
+
 
 
 }

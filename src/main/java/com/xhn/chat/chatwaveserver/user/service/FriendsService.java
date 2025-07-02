@@ -2,6 +2,9 @@ package com.xhn.chat.chatwaveserver.user.service;
 
 import com.xhn.chat.chatwaveserver.user.model.FriendsEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xhn.chat.chatwaveserver.user.model.model.FriendGroupListModel;
+
+import java.util.List;
 
 /**
 * @author 93095
@@ -12,4 +15,6 @@ public interface FriendsService extends IService<FriendsEntity> {
 
 
     void acceptFriendRequest(FriendsEntity friendsEntity);
+
+    List<FriendGroupListModel> getFriendsList(Long userId);
 }

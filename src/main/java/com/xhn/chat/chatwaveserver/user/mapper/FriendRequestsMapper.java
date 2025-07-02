@@ -17,8 +17,8 @@ public interface FriendRequestsMapper extends BaseMapper<FriendRequestsEntity> {
 
     List<FriendRequestModel> getFriendRequestsByUserId(Long userId);
 
-    @Update("UPDATE friend_requests SET status = 1 WHERE sender_id = #{friendId} AND receiver_id = #{userId}")
-    void updateFriendRequestStatus(Long userId, Long friendId);
+    @Update("UPDATE friend_requests SET status = #{statusCode} WHERE sender_id = #{friendId} AND receiver_id = #{userId}")
+    void updateFriendRequestStatus(Long userId, Long friendId,int statusCode);
 }
 
 

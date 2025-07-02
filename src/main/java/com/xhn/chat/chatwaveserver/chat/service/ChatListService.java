@@ -2,6 +2,7 @@ package com.xhn.chat.chatwaveserver.chat.service;
 
 import com.xhn.chat.chatwaveserver.chat.model.ChatListEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xhn.chat.chatwaveserver.user.model.FriendsEntity;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ import java.util.List;
 public interface ChatListService extends IService<ChatListEntity> {
 
     List<ChatListEntity> getChatList(Long currentUsername);
+
+    boolean createChatList(FriendsEntity friendsEntity);
 }

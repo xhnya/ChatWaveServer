@@ -49,7 +49,7 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
 
     @Override
     public void updateFriendRequest(FriendsEntity friendsEntity) {
-        baseMapper.updateFriendRequestStatus(friendsEntity.getUserId(), friendsEntity.getFriendId());
+        baseMapper.updateFriendRequestStatus(friendsEntity.getUserId(), friendsEntity.getFriendId(),friendsEntity.getStatus());
     }
 }
 
