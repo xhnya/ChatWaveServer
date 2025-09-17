@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .pathMatchers(
                                 "/users/login",
                                 "/users/referToken",
-                                "/users/test",
+                                "/user/account/test",
                                 "/users/register",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
